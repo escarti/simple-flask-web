@@ -1,4 +1,4 @@
-from simpleweb import hello
+from app.simpleweb import hello
 
 def test_hello():
     """
