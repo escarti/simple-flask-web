@@ -30,7 +30,7 @@ jobs:
         push: false
     
     - name: Test the image
-      run: docker-compose -f docker-compose_test.yaml up
+      run: docker-compose -f docker-compose_test.yaml up --exit-code-from webapp
       env:
         IMAGE: ${{ github.repository  }}:latest
     
