@@ -90,7 +90,7 @@ jobs:
       with:
         task-definition: task-definition.json
         container-name: simple_flask_web
-        image: ${{ github.repository  }}:$env.CURR_TAG }}
+        image: ${{ github.repository  }}:${{ env.CURR_TAG }}
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
