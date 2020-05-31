@@ -13,61 +13,64 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job for building testing and pushing image
-  # build-test-push:
-  #   # The type of runner that the job will run on
-  #   runs-on: ubuntu-latest
+  build-test-push:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
 
-  #   # Steps represent a sequence of tasks that will be executed as part of the job
-  #   steps:
-  #   # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-  #   - uses: actions/checkout@v2
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
     
-  #   - name: Set env
-  #     run: echo ::set-env name=CURR_TAG::sha-$(echo $GITHUB_SHA | cut -c 1-7)
-  #     env:
-  #       DEPLOY_MODE: ${{ secrets.DEPLOY_MODE }}
-    
-  #   - uses: docker/build-push-action@v1
-  #     with:
-  #       tag_with_ref: true
-  #       tags: latest,${{ env.CURR_TAG }}
-  #       push: false
-    
-  #   - name: Test the image
-  #     run: docker-compose -f docker-compose_test.yaml up --exit-code-from webapp
-  #     env:
-  #       IMAGE: ${{ github.repository  }}:${{ env.CURR_TAG }}
-    
-  #   - uses: docker/build-push-action@v1
-  #     if: ${{ github.ref == 'refs/heads/master' }}
-  #     with:
-  #       username: ${{ secrets.DOCKER_USERNAME }}
-  #       password: ${{ secrets.DOCKER_PASSWORD }}
-  #       repository: ${{ secrets.DOCKER_REPO  }}
-  #       tag_with_ref: true
-  #       tag_with_sha: true
-  #       tags: latest
-    
-  #   - name: Deploy new image on docker-swarm
-  #     if: ${{ github.ref == 'refs/heads/master' && env.DEPLOY_MODE == 'swarm' }}
-  #     uses: fifsky/ssh-action@master
-  #     with:
-  #       command: |
-  #         docker service update --image ${{ github.repository  }}:${{ env.CURR_TAG }} webapp
-  #       host: ${{ secrets.HOST }}
-  #       user: ec2-user
-  #       key: ${{ secrets.PRIVATE_KEY}}
+    - name: Set env TAG
+      run: echo ::set-env name=CURR_TAG::sha-$(echo $GITHUB_SHA | cut -c 1-7)
 
+    - name: Set env DEPLOY_MODE
+      run: echo ::set-env name=DEPLOY_MODE::${{ secrets.DEPLOY_MODE }}
+    
+    - uses: docker/build-push-action@v1
+      with:
+        tag_with_ref: true
+        tags: latest,${{ env.CURR_TAG }}
+        push: false
+    
+    - name: Test the image
+      run: docker-compose -f docker-compose_test.yaml up --exit-code-from webapp
+      env:
+        IMAGE: ${{ github.repository  }}:${{ env.CURR_TAG }}
+    
+    - uses: docker/build-push-action@v1
+      #if: ${{ github.ref == 'refs/heads/master' }}
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: ${{ secrets.DOCKER_REPO  }}
+        tag_with_ref: true
+        tag_with_sha: true
+        tags: latest
+    
+    - name: Deploy new image on docker-swarm
+      if: ${{ github.ref == 'refs/heads/master' && env.DEPLOY_MODE == 'swarm' }}
+      uses: fifsky/ssh-action@master
+      with:
+        command: |
+          docker service update --image ${{ github.repository  }}:${{ env.CURR_TAG }} webapp
+        host: ${{ secrets.HOST }}
+        user: ec2-user
+        key: ${{ secrets.PRIVATE_KEY}}
 
   deploy_fargate:
-    #needs: build-test-push
+    needs: build-test-push
     runs-on: ubuntu-latest
 
     steps:
 
-    - name: Set env
-      run: echo ::set-env name=DEPLOY_MODE::${{ secrets.DEPLOY_MODE }}
+    - name: Set env TAG
+      run: echo ::set-env name=CURR_TAG::sha-$(echo $GITHUB_SHA | cut -c 1-7)
 
+    - name: Set env DEPLOY_MODE
+      run: echo ::set-env name=DEPLOY_MODE::${{ secrets.DEPLOY_MODE }}
+    
     - name: Configure AWS credentials from Test account
       #if: ${{ github.ref == 'refs/heads/master' && env.DEPLOY_MODE == 'swarm' }}
       if: ${{ env.DEPLOY_MODE == 'fargate' }}
@@ -87,7 +90,7 @@ jobs:
       with:
         task-definition: task-definition.json
         container-name: simple_flask_web
-        image: escarti/simple-flask-web:sha-0910187
+        image: ${{ github.repository  }}:${{ env.CURR_TAG }}
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
