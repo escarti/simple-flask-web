@@ -62,8 +62,9 @@ jobs:
     needs: build-test-push
     runs-on: ubuntu-latest
     env:
-        DEPLOY_MODE: ${{ secrets.DEPLOY_MODE }}
-    if: ${{ github.ref == 'refs/heads/master' && env.DEPLOY_MODE == 'fargate' }}
+      DEPLOY_MODE: ${{ secrets.DEPLOY_MODE }}
+    #if: ${{ github.ref == 'refs/heads/master' && env.DEPLOY_MODE == 'fargate' }}
+    if: ${{ env.DEPLOY_MODE == 'fargate' }}
 
     steps:
     - name: Configure AWS credentials from Test account
