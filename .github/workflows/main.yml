@@ -64,8 +64,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    
+
     - name: Set env
+      run: echo "Deploy mode is ${DEPLOY_MODE}"
       env:
         DEPLOY_MODE: ${{ secrets.DEPLOY_MODE }}
 
