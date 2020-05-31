@@ -80,10 +80,12 @@ jobs:
         aws-region: ${{ secrets.AWS_REGION }}
 
     - name: Download task definition
+      if: ${{ github.ref == 'refs/heads/master' && env.DEPLOY_MODE == 'fargate' }}
       run: |
         aws ecs describe-task-definition --task-definition sfw-task --query taskDefinition > task-definition.json
       
     - name: Fill in the new image ID in the Amazon ECS task definition
+      if: ${{ github.ref == 'refs/heads/master' && env.DEPLOY_MODE == 'fargate' }}
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
@@ -92,6 +94,7 @@ jobs:
         image: ${{ github.repository  }}:${{ env.CURR_TAG }}
 
     - name: Deploy Amazon ECS task definition
+      if: ${{ github.ref == 'refs/heads/master' && env.DEPLOY_MODE == 'fargate' }}
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
