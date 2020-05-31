@@ -85,7 +85,7 @@ jobs:
     - name: Download task definition
       #if: ${{ github.ref == 'refs/heads/master' && env.DEPLOY_MODE == 'fargate' }}
       run: |
-        aws ecs describe-task-definition --task-definition sfw-task --query taskDefinition > task-definition.json
+        aws ecs describe-task-definition --task-definition ${{ env.ONWER_ID }}-sfw-task --query taskDefinition > task-definition.json
       
     - name: Fill in the new image ID in the Amazon ECS task definition
       #if: ${{ github.ref == 'refs/heads/master' && env.DEPLOY_MODE == 'fargate' }}
