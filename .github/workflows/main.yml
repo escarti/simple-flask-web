@@ -68,6 +68,12 @@ jobs:
 
     steps:
 
+    - name: Set env TAG
+      run: echo ::set-env name=CURR_TAG::sha-$(echo $GITHUB_SHA | cut -c 1-7)
+
+    - name: Set env DEPLOY_MODE
+      run: echo ::set-env name=DEPLOY_MODE::${{ secrets.DEPLOY_MODE }}
+    
     - name: Configure AWS credentials from Test account
       #if: ${{ github.ref == 'refs/heads/master' && env.DEPLOY_MODE == 'fargate' }}
       uses: aws-actions/configure-aws-credentials@v1
