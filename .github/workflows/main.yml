@@ -60,7 +60,7 @@ jobs:
 
 
   deploy_fargate:
-    needs: build-test-push
+    #needs: build-test-push
     runs-on: ubuntu-latest
 
     steps:
