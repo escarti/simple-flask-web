@@ -24,6 +24,8 @@ jobs:
     
     - name: Set env
       run: echo ::set-env name=CURR_TAG::sha-$(echo $GITHUB_SHA | cut -c 1-7)
+      env:
+        DEPLOY_MODE: ${{ secrets.DEPLOY_MODE }}
     
     - uses: docker/build-push-action@v1
       with:
@@ -55,19 +57,21 @@ jobs:
         host: ${{ secrets.HOST }}
         user: ec2-user
         key: ${{ secrets.PRIVATE_KEY}}
-      env:
-        DEPLOY_MODE: ${{ secrets.DEPLOY_MODE }}
+
 
   deploy_fargate:
     needs: build-test-push
     runs-on: ubuntu-latest
-    env:
-      DEPLOY_MODE: ${{ secrets.DEPLOY_MODE }}
-    #if: ${{ github.ref == 'refs/heads/master' && env.DEPLOY_MODE == 'fargate' }}
-    if: ${{ env.DEPLOY_MODE == 'fargate' }}
 
     steps:
+    
+    - name: Set env
+      env:
+        DEPLOY_MODE: ${{ secrets.DEPLOY_MODE }}
+
     - name: Configure AWS credentials from Test account
+      #if: ${{ github.ref == 'refs/heads/master' && env.DEPLOY_MODE == 'swarm' }}
+      if: ${{ env.DEPLOY_MODE == 'fargate' }}
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
