@@ -12,7 +12,7 @@ on:
 
 env:
   ONWER_ID: superman
-  SUFFIX: $VUESTRO_FARGATE_SUFFIX
+  SUFFIX: iiGIMPUB
 
 
 jobs:
